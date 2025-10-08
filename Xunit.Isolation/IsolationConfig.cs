@@ -10,18 +10,19 @@ internal class IsolationConfig
     {
         get
         {
-            if (_instance != null)
-                return _instance;
+            if (_instance == null)
+            {
+                var instance = new IsolationConfig();
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("isolation.json", optional: true)
+                    .Build();
 
-            var instance = new IsolationConfig();
-            new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("isolation.json")
-                .Build()
-                .Bind(instance);
+                config.Bind(instance);
+                _instance = instance;
+            }
 
-            _instance = instance;
-            return instance;
+            return _instance;
         }
     }
 
