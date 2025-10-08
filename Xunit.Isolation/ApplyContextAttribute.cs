@@ -1,6 +1,7 @@
 using AssemblyLoadContextHelper;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
@@ -36,31 +37,61 @@ public class ApplyContextAttribute : Attribute
 
     static ApplyContextAttribute()
     {
-        foreach (var assembly in AssemblyLoadContext.Default.Assemblies)
-            foreach (var type in assembly.GetTypes())
-                foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
-                    foreach (var attr in method.GetCustomAttributes<ApplyContextAttribute>())
+        var asmLoadContext = AssemblyLoadContext.Default;
+        foreach (var assembly in asmLoadContext.Assemblies)
+        {
+            try
+            {
+                foreach (var type in assembly.GetTypes())
+                    foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
                     {
-                        if (method.GetParameters().Length != 2)
-                            continue;
-
-                        if (method.GetParameters()[1].ParameterType != typeof(IsolationContext))
-                            continue;
-
-                        var handleType = method.GetParameters()[0].ParameterType;
-                        if (handleType != method.ReturnType)
-                            continue;
-
-                        if (_methodInfoDict.TryGetValue(handleType, out var existing))
+                        try
                         {
-                            if (existing.priority < attr.Priority)
+                            var attr = method.GetCustomAttribute<ApplyContextAttribute>();
+                            if (attr == null)
+                                continue;
+
+                            if (method.GetParameters().Length != 2)
+                                continue;
+
+                            if (method.GetParameters()[1].ParameterType != typeof(IsolationContext))
+                                continue;
+
+                            var handleType = method.GetParameters()[0].ParameterType;
+                            if (handleType != method.ReturnType)
+                                continue;
+
+                            if (_methodInfoDict.TryGetValue(handleType, out var existing))
+                            {
+                                if (existing.priority < attr.Priority)
+                                    _methodInfoDict[handleType] = (attr.Priority, method);
+                            }
+                            else
+                            {
                                 _methodInfoDict[handleType] = (attr.Priority, method);
+                            }
                         }
-                        else
+                        catch (TypeLoadException ex) when (ex.TypeName == "System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute")
                         {
-                            _methodInfoDict[handleType] = (attr.Priority, method);
+                            // There is a known issue about bad reference in Microsoft.TestPlatform.CoreUtilities,
+                            // which can cause TypeInitializationException
+                            // Since there are no any references to ApplyContextAttribute in this assembly, simply skip it.
+                            // https://github.com/microsoft/vstest/issues/4624
+                            // https://github.com/microsoft/vstest/issues/4638
+                            Debug.WriteLine(ex);
                         }
                     }
+            }
+            catch (TypeInitializationException ex) when (ex.TypeName == "System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute")
+            {
+                // There is a known issue about bad reference in Microsoft.TestPlatform.CoreUtilities,
+                // which can cause TypeInitializationException
+                // Since there are no any references to ApplyContextAttribute in this assembly, simply skip it.
+                // https://github.com/microsoft/vstest/issues/4624
+                // https://github.com/microsoft/vstest/issues/4638
+                Debug.WriteLine(ex);
+            }
+        }
     }
 
     /// <summary>
@@ -74,7 +105,7 @@ public class ApplyContextAttribute : Attribute
 
         var type = original.GetType();
         if (!_methodInfoDict.TryGetValue(type, out var func))
-            throw new NotImplementedException();
+            throw new NotImplementedException($"Failed to ApplyContext to type {type.FullName}");
 
         return (T)func.methodInfo.Invoke(null, [original, context])!;
     }
