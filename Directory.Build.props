@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Authors>Harnel</Authors>
+    <Company>Harnel</Company>
+    
+    <BaseIntermediateOutputPath>$(SolutionDir)obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <OutputPath>$(SolutionDir)bin\$(MSBuildProjectName)</OutputPath>
+  </PropertyGroup>
+</Project>

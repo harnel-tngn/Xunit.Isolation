@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+    <PackageId>Xunit.Isolation</PackageId>
+    <Version>$(PackageVersion)</Version>
+    <Description>Make Xunit able to execute tests on isolated environment using different AssemblyLoadContext.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/harnel-tngn/Xunit.Isolation</RepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AssemblyLoadContextHelper" Version="0.0.3" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+</Project>
