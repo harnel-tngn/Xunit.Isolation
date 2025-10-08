@@ -1,7 +1,9 @@
 using AssemblyLoadContextHelper;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
@@ -37,60 +39,66 @@ public class ApplyContextAttribute : Attribute
 
     static ApplyContextAttribute()
     {
-        var asmLoadContext = AssemblyLoadContext.Default;
-        foreach (var assembly in asmLoadContext.Assemblies)
+        var assemblyLoadContext = AssemblyLoadContext.Default;
+        foreach (var assemblyName in IsolationConfig.Instance.IsolationAssemblies)
         {
-            try
-            {
-                foreach (var type in assembly.GetTypes())
-                    foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+            var assembly = assemblyLoadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
+            LoadFromAssembly(assembly);
+        }
+    }
+
+    private static void LoadFromAssembly(Assembly assembly)
+    {
+        try
+        {
+            foreach (var type in assembly.GetTypes())
+                foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+                {
+                    try
                     {
-                        try
+                        var attr = method.GetCustomAttribute<ApplyContextAttribute>();
+                        if (attr == null)
+                            continue;
+
+                        if (method.GetParameters().Length != 2)
+                            continue;
+
+                        if (method.GetParameters()[1].ParameterType != typeof(IsolationContext))
+                            continue;
+
+                        var handleType = method.GetParameters()[0].ParameterType;
+                        if (handleType != method.ReturnType)
+                            continue;
+
+                        if (_methodInfoDict.TryGetValue(handleType, out var existing))
                         {
-                            var attr = method.GetCustomAttribute<ApplyContextAttribute>();
-                            if (attr == null)
-                                continue;
-
-                            if (method.GetParameters().Length != 2)
-                                continue;
-
-                            if (method.GetParameters()[1].ParameterType != typeof(IsolationContext))
-                                continue;
-
-                            var handleType = method.GetParameters()[0].ParameterType;
-                            if (handleType != method.ReturnType)
-                                continue;
-
-                            if (_methodInfoDict.TryGetValue(handleType, out var existing))
-                            {
-                                if (existing.priority < attr.Priority)
-                                    _methodInfoDict[handleType] = (attr.Priority, method);
-                            }
-                            else
-                            {
+                            if (existing.priority < attr.Priority)
                                 _methodInfoDict[handleType] = (attr.Priority, method);
-                            }
                         }
-                        catch (TypeLoadException ex) when (ex.TypeName == "System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute")
+                        else
                         {
-                            // There is a known issue about bad reference in Microsoft.TestPlatform.CoreUtilities,
-                            // which can cause TypeInitializationException
-                            // Since there are no any references to ApplyContextAttribute in this assembly, simply skip it.
-                            // https://github.com/microsoft/vstest/issues/4624
-                            // https://github.com/microsoft/vstest/issues/4638
-                            Debug.WriteLine(ex);
+                            _methodInfoDict[handleType] = (attr.Priority, method);
                         }
                     }
-            }
-            catch (TypeInitializationException ex) when (ex.TypeName == "System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute")
-            {
-                // There is a known issue about bad reference in Microsoft.TestPlatform.CoreUtilities,
-                // which can cause TypeInitializationException
-                // Since there are no any references to ApplyContextAttribute in this assembly, simply skip it.
-                // https://github.com/microsoft/vstest/issues/4624
-                // https://github.com/microsoft/vstest/issues/4638
-                Debug.WriteLine(ex);
-            }
+                    catch (TypeLoadException ex) when (ex.TypeName == "System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute")
+                    {
+                        // There is a known issue about bad reference in Microsoft.TestPlatform.CoreUtilities,
+                        // which can cause TypeInitializationException
+                        // Since there are no any references to ApplyContextAttribute in this assembly, simply skip it.
+                        // https://github.com/microsoft/vstest/issues/4624
+                        // https://github.com/microsoft/vstest/issues/4638
+                        Debug.WriteLine(ex);
+                    }
+                }
+        }
+        catch (TypeInitializationException ex) when (ex.TypeName == "System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute")
+        {
+            // There is a known issue about bad reference in Microsoft.TestPlatform.CoreUtilities,
+            // which can cause TypeInitializationException
+            // Since there are no any references to ApplyContextAttribute in this assembly, simply skip it.
+            // https://github.com/microsoft/vstest/issues/4624
+            // https://github.com/microsoft/vstest/issues/4638
+            Debug.WriteLine(ex);
         }
     }
 
