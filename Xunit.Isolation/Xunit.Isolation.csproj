@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
+  <PropertyGroup>
     <PackageId>Xunit.Isolation</PackageId>
     <Version>$(PackageVersion)</Version>
     <Description>Make Xunit able to execute tests on isolated environment using different AssemblyLoadContext.</Description>
@@ -9,7 +9,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-	</PropertyGroup>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AssemblyLoadContextHelper" Version="0.0.3" />
