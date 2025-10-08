@@ -1,0 +1,6 @@
+{
+  "isolationAssemblies": [
+    "Xunit.Isolation",
+    "Xunit.Isolation.SkippableFact"
+  ]
+}

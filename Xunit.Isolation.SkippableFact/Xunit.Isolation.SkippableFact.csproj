@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Xunit.Isolation.SkippableFact</PackageId>
+    <Version>$(PackageVersion)</Version>
+    <Description>Make Xunit.SkippableFact able to execute tests on isolated environment using different AssemblyLoadContext.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/harnel-tngn/Xunit.Isolation</RepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Xunit.Isolation\Xunit.Isolation.csproj" />
+  </ItemGroup>
+
+</Project>
