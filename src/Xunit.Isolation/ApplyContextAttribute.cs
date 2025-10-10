@@ -149,6 +149,25 @@ public class ApplyContextAttribute : Attribute
     }
 
     [ApplyContext]
+    private static XunitTheoryTestCase ApplyContextImpl(XunitTheoryTestCase testCase, IsolationContext context)
+    {
+        return new XunitTheoryTestCase(
+            GetDiagnosticMessageSink(testCase),
+            GetDefaultMethodDisplay(testCase),
+            GetDefaultMethodDisplayOptions(testCase),
+            ApplyContext(testCase.TestMethod, context));
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DiagnosticMessageSink")]
+        static extern IMessageSink GetDiagnosticMessageSink(XunitTestCase testCase);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DefaultMethodDisplay")]
+        static extern TestMethodDisplay GetDefaultMethodDisplay(TestMethodTestCase testCase);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DefaultMethodDisplayOptions")]
+        static extern TestMethodDisplayOptions GetDefaultMethodDisplayOptions(TestMethodTestCase testCase);
+    }
+
+    [ApplyContext]
     private static TestAssembly ApplyContextImpl(TestAssembly testAssembly, IsolationContext context)
     {
         return new TestAssembly(
