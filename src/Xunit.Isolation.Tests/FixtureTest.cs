@@ -7,11 +7,11 @@ public class FixtureTest
         public int FixtureValue;
     }
 
-    public class InnerClass1 : IClassFixture<TestFixture>
+    public abstract class InnerClass : IClassFixture<TestFixture>
     {
         private readonly TestFixture _fixture;
 
-        public InnerClass1(TestFixture fixture)
+        public InnerClass(TestFixture fixture)
         {
             _fixture = fixture;
         }
@@ -24,54 +24,8 @@ public class FixtureTest
         }
     }
 
-    public class InnerClass2 : IClassFixture<TestFixture>
-    {
-        private readonly TestFixture _fixture;
-
-        public InnerClass2(TestFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
-        [Fact]
-        public void Test()
-        {
-            _fixture.FixtureValue++;
-            Assert.Equal(1, _fixture.FixtureValue);
-        }
-    }
-
-    public class InnerClass3 : IClassFixture<TestFixture>
-    {
-        private readonly TestFixture _fixture;
-
-        public InnerClass3(TestFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
-        [Fact]
-        public void Test()
-        {
-            _fixture.FixtureValue++;
-            Assert.Equal(1, _fixture.FixtureValue);
-        }
-    }
-
-    public class InnerClass4 : IClassFixture<TestFixture>
-    {
-        private readonly TestFixture _fixture;
-
-        public InnerClass4(TestFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
-        [Fact]
-        public void Test()
-        {
-            _fixture.FixtureValue++;
-            Assert.Equal(1, _fixture.FixtureValue);
-        }
-    }
+    public class InnerClass1(TestFixture fixture) : InnerClass(fixture);
+    public class InnerClass2(TestFixture fixture) : InnerClass(fixture);
+    public class InnerClass3(TestFixture fixture) : InnerClass(fixture);
+    public class InnerClass4(TestFixture fixture) : InnerClass(fixture);
 }

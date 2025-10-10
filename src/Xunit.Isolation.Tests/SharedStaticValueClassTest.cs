@@ -4,7 +4,7 @@ public class SharedStaticValueClassTest
 {
     public static int StaticValue;
 
-    public class InnerClass1
+    public abstract class InnerClass
     {
         [Fact]
         public void Test()
@@ -14,33 +14,8 @@ public class SharedStaticValueClassTest
         }
     }
 
-    public class InnerClass2
-    {
-        [Fact]
-        public void Test()
-        {
-            SharedStaticValueClassTest.StaticValue++;
-            Assert.Equal(1, SharedStaticValueClassTest.StaticValue);
-        }
-    }
-
-    public class InnerClass3
-    {
-        [Fact]
-        public void Test()
-        {
-            SharedStaticValueClassTest.StaticValue++;
-            Assert.Equal(1, SharedStaticValueClassTest.StaticValue);
-        }
-    }
-
-    public class InnerClass4
-    {
-        [Fact]
-        public void Test()
-        {
-            SharedStaticValueClassTest.StaticValue++;
-            Assert.Equal(1, SharedStaticValueClassTest.StaticValue);
-        }
-    }
+    public class InnerClass1 : InnerClass;
+    public class InnerClass2 : InnerClass;
+    public class InnerClass3 : InnerClass;
+    public class InnerClass4 : InnerClass;
 }
