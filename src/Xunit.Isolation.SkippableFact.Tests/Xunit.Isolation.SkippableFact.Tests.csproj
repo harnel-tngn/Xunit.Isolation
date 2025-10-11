@@ -6,6 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Xunit.Isolation.Tests\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="..\Xunit.Isolation.Tests\AssemblyInfo.cs" />
+    <Compile Remove="..\Xunit.Isolation.Tests\FixtureTest.cs" />
+    <Compile Remove="..\Xunit.Isolation.Tests\ParameterClass.cs" />
+    <Compile Remove="..\Xunit.Isolation.Tests\ParameterStruct.cs" />
+    <Compile Remove="..\Xunit.Isolation.Tests\SharedStaticValueClassTest.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
