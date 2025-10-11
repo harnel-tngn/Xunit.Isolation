@@ -33,4 +33,26 @@ public class SkippableFactApplyContextMethods
         static extern TestMethodDisplayOptions GetDefaultMethodDisplayOptions(TestMethodTestCase testCase);
     }
 
+    [ApplyContext]
+    private static SkippableTheoryTestCase ApplyContextImpl(SkippableTheoryTestCase testCase, IsolationContext context)
+    {
+        return new SkippableTheoryTestCase(
+            GetSkippingExceptionNames(testCase),
+            GetDiagnosticMessageSink(testCase),
+            GetDefaultMethodDisplay(testCase),
+            GetDefaultMethodDisplayOptions(testCase),
+            ApplyContextAttribute.ApplyContext(testCase.TestMethod, context)!);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SkippingExceptionNames")]
+        static extern string[] GetSkippingExceptionNames(SkippableTheoryTestCase testCase);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DiagnosticMessageSink")]
+        static extern IMessageSink GetDiagnosticMessageSink(XunitTestCase testCase);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DefaultMethodDisplay")]
+        static extern TestMethodDisplay GetDefaultMethodDisplay(TestMethodTestCase testCase);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_DefaultMethodDisplayOptions")]
+        static extern TestMethodDisplayOptions GetDefaultMethodDisplayOptions(TestMethodTestCase testCase);
+    }
 }
