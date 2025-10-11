@@ -14,7 +14,7 @@ public class IsolationExecutor : XunitTestFrameworkExecutor
     /// Constructor for IsolationExecutor
     /// </summary>
     public IsolationExecutor(
-        AssemblyName assemblyName, 
+        AssemblyName assemblyName,
         ISourceInformationProvider sourceInformationProvider,
         IMessageSink diagnosticMessageSink)
         : base(assemblyName, sourceInformationProvider, diagnosticMessageSink)
@@ -25,8 +25,8 @@ public class IsolationExecutor : XunitTestFrameworkExecutor
     /// Run test cases in isolated environment
     /// </summary>
     protected override async void RunTestCases(
-        IEnumerable<IXunitTestCase> testCases, 
-        IMessageSink executionMessageSink, 
+        IEnumerable<IXunitTestCase> testCases,
+        IMessageSink executionMessageSink,
         ITestFrameworkExecutionOptions executionOptions)
     {
         using var assemblyRunner = new IsolationTestAssemblyRunner(TestAssembly, testCases, DiagnosticMessageSink, executionMessageSink, executionOptions);

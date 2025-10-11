@@ -1,9 +1,7 @@
 using AssemblyLoadContextHelper;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
