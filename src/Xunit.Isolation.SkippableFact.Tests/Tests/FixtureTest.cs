@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Runtime.Loader;
+using Xunit.Isolation.Tests;
 
-namespace Xunit.Isolation.Tests;
+namespace Xunit.Isolation.SkippableFact.Tests.Tests;
 
 public class FixtureTest
 {
@@ -19,11 +20,11 @@ public class FixtureTest
             _fixture = fixture;
         }
 
-        [Fact]
+        [SkippableFact]
         public void Test()
         {
             var fixtureLoadContext = AssemblyLoadContext.GetLoadContext(_fixture.GetType().Assembly);
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, fixtureLoadContext);
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
@@ -41,11 +42,11 @@ public class FixtureTest
             [new ParameterClass(4)],
         ];
 
-        [Theory]
+        [SkippableTheory]
         [MemberData(nameof(ParameterClassTheoryTestMemberData))]
         public void ParameterClassTheoryTest(ParameterClass param)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
             var paramLoadContext = AssemblyLoadContext.GetLoadContext(param.GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
@@ -64,11 +65,11 @@ public class FixtureTest
             [new ParameterStruct(4)],
         ];
 
-        [Theory]
+        [SkippableTheory]
         [MemberData(nameof(ParameterStructTheoryTestMemberData))]
         public void ParameterStructTheoryTest(ParameterStruct param)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
             var paramLoadContext = AssemblyLoadContext.GetLoadContext(param.GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);

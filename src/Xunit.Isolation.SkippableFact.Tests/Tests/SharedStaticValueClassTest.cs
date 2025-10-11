@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Runtime.Loader;
+using Xunit.Isolation.Tests;
 
-namespace Xunit.Isolation.Tests;
+namespace Xunit.Isolation.SkippableFact.Tests.Tests;
 
 public class SharedStaticValueClassTest
 {
@@ -12,12 +13,12 @@ public class SharedStaticValueClassTest
         [SkippableFact]
         public void FactTest()
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
 
-            SharedStaticValueClassTest.StaticValue++;
-            Assert.Equal(1, SharedStaticValueClassTest.StaticValue);
+            StaticValue++;
+            Assert.Equal(1, StaticValue);
         }
 
         public static IEnumerable<object[]> ParameterClassTheoryTestMemberData =>
@@ -32,7 +33,7 @@ public class SharedStaticValueClassTest
         [MemberData(nameof(ParameterClassTheoryTestMemberData))]
         public void ParameterClassTheoryTest(ParameterClass param)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
             var paramLoadContext = AssemblyLoadContext.GetLoadContext(param.GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
@@ -55,7 +56,7 @@ public class SharedStaticValueClassTest
         [MemberData(nameof(ParameterStructTheoryTestMemberData))]
         public void ParameterStructTheoryTest(ParameterStruct param)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
             var paramLoadContext = AssemblyLoadContext.GetLoadContext(param.GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
