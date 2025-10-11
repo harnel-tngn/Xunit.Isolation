@@ -1,4 +1,4 @@
-﻿namespace Xunit.Isolation.Tests;
+﻿namespace Xunit.Isolation.SkippableFact.Tests;
 
 /// <summary>
 /// Class used as paramters in theory tests.

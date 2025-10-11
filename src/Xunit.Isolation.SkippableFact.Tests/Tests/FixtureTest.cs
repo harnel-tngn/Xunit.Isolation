@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Runtime.Loader;
-using Xunit.Isolation.Tests;
 
 namespace Xunit.Isolation.SkippableFact.Tests.Tests;
 
