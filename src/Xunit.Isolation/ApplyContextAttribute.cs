@@ -12,6 +12,7 @@ namespace Xunit.Isolation;
 
 /// <summary>
 /// Indicates which method is used for applying context to test related objects. <br/>
+/// Methods marked with this attribute executed on default <see cref="AssemblyLoadContext"/>. <br/>
 /// Target methods should be static method with 2 parameters; 
 /// type related object and <see cref="IsolationContext"/>, and return the type related object with context applied. <br/>
 /// 
@@ -33,12 +34,12 @@ public class ApplyContextAttribute : Attribute
         Priority = priority;
     }
 
-    private readonly static Dictionary<Type, (int priority, MethodInfo methodInfo)> _methodInfoDict = new();
+    private static readonly Dictionary<Type, (int priority, MethodInfo methodInfo)> _methodInfoDict = new();
 
     static ApplyContextAttribute()
     {
         var assemblyLoadContext = AssemblyLoadContext.Default;
-        foreach (var assemblyName in IsolationConfig.Instance.IsolationAssemblies)
+        foreach (var assemblyName in IsolationExecutionConfig.Instance.IsolationAssemblies)
         {
             var assembly = assemblyLoadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
             LoadFromAssembly(assembly);

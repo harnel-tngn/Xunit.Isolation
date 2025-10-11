@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Xunit.Isolation.Tests\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="..\Xunit.Isolation.Tests\AssemblyInfo.cs" />
     <Compile Remove="..\Xunit.Isolation.Tests\FixtureTest.cs" />
     <Compile Remove="..\Xunit.Isolation.Tests\ParameterClass.cs" />

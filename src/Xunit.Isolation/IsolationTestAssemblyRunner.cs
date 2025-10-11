@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,10 +26,10 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
     {
     }
 
-    private IsolationContext GetOrCreateIsolationContext(bool unloadAtEnd)
+    private static IsolationContext GetOrCreateIsolationContext(Type? typeInfo)
     {
-        // TODO: use pooling
-        return new IsolationContext(unloadAtEnd);
+        var contextConfig = IsolationContextConfigAttribute.GetConfig(typeInfo);
+        return IsolationContext.GetOrCreate(contextConfig.IsolationId);
     }
 
     /// <summary>
@@ -40,13 +41,31 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         IEnumerable<IXunitTestCase> testCases,
         CancellationTokenSource cancellationTokenSource)
     {
-        using var context = GetOrCreateIsolationContext(false);
-
-        var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
-        var clonedTestCases = testCases
-            .Select(testCase => ApplyContextAttribute.ApplyContext(testCase, context))
+        var testIsolationContextDict = testCases
+            .GroupBy(testCase => IsolationContextConfigAttribute.GetConfig(testCase.TestMethod.TestClass.Class.ToRuntimeType()))
+            .Select(g => KeyValuePair.Create(
+                GetOrCreateIsolationContext(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
+                g.ToArray()))
             .ToArray();
 
-        return await base.RunTestCollectionAsync(messageBus, clonedTestCollection, clonedTestCases, cancellationTokenSource);
+        if (testIsolationContextDict.Length == 1)
+        {
+            using var context = testIsolationContextDict.First().Key;
+
+            var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
+            var clonedTestCases = testCases
+                .Select(testCase => ApplyContextAttribute.ApplyContext(testCase, context))
+                .ToArray();
+
+            return await base.RunTestCollectionAsync(messageBus, testCollection, clonedTestCases, cancellationTokenSource);
+        }
+        else
+        {
+            var summary = new RunSummary();
+            foreach (var (_, subTestCases) in testIsolationContextDict)
+                summary.Aggregate(await RunTestCollectionAsync(messageBus, testCollection, subTestCases, cancellationTokenSource));
+
+            return summary;
+        }
     }
 }
