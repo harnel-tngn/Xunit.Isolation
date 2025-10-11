@@ -1,7 +1,7 @@
 ﻿namespace Xunit.Isolation.Tests;
 
 /// <summary>
-/// Class used as paramter in theory tests.
+/// Struct used as paramters in theory tests.
 /// </summary>
 public record struct ParameterStruct(int Value)
 {
