@@ -62,6 +62,9 @@ internal static class AssemblyLoadContextIndependentStorageProxy
     /// <summary>
     /// Get from storage dictionary with given identifier.
     /// </summary>
+    /// <exception cref="KeyNotFoundException">
+    /// The property is retrieved and <paramref name="identifier"/> does not exist in the collection.
+    /// </exception>
     public static TValue Get<TValue>(string identifier)
     {
         if (typeof(TValue).Assembly.GetName().Name != "System.Private.CoreLib")
