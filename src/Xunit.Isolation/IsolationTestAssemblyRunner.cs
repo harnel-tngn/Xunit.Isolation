@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +27,15 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
 
     /// <summary>
     /// Run test collection in isolated environment
+    /// <summary>
+    /// Runs the provided test collection, executing tests in isolation according to each test's IsolationContextConfigAttribute.
+    /// When all tests share the same isolation configuration, a single IsolationContext is created and applied to the collection and its tests; when multiple configurations exist, the collection is executed once per configuration and results are aggregated.
     /// </summary>
+    /// <param name="messageBus">The message bus used to report test execution messages.</param>
+    /// <param name="testCollection">The test collection to run.</param>
+    /// <param name="testCases">The test cases from the collection; they are grouped by isolation configuration before execution.</param>
+    /// <param name="cancellationTokenSource">Cancellation token source that may be used to cancel the run.</param>
+    /// <returns>A RunSummary containing aggregated results for the executed tests.</returns>
     protected override async Task<RunSummary> RunTestCollectionAsync(
         IMessageBus messageBus,
         ITestCollection testCollection,
