@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,16 +34,16 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         IEnumerable<IXunitTestCase> testCases,
         CancellationTokenSource cancellationTokenSource)
     {
-        var testIsolationContextDict = testCases
+        var testIsolationConfigGroup = testCases
             .GroupBy(testCase => IsolationContextConfigAttribute.GetConfig(testCase.TestMethod.TestClass.Class.ToRuntimeType()))
             .Select(g => KeyValuePair.Create(
                 IsolationContextConfigAttribute.GetConfig(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
                 g.ToArray()))
             .ToArray();
 
-        if (testIsolationContextDict.Length == 1)
+        if (testIsolationConfigGroup.Length == 1)
         {
-            var config = testIsolationContextDict.First().Key;
+            var config = testIsolationConfigGroup.First().Key;
             using var context = IsolationContext.GetOrCreate(config);
 
             var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
@@ -57,7 +56,7 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         else
         {
             var summary = new RunSummary();
-            foreach (var (_, subTestCases) in testIsolationContextDict)
+            foreach (var (_, subTestCases) in testIsolationConfigGroup)
                 summary.Aggregate(await RunTestCollectionAsync(messageBus, testCollection, subTestCases, cancellationTokenSource));
 
             return summary;
