@@ -10,6 +10,16 @@ namespace Xunit.Isolation;
 public class IsolationFramework : XunitTestFramework
 {
     /// <summary>
+    /// Name of framework class
+    /// </summary>
+    public const string TypeName = "Xunit.Isolation.IsolationFramework";
+
+    /// <summary>
+    /// Name of assembly
+    /// </summary>
+    public const string AssemblyName = "Xunit.Isolation";
+
+    /// <summary>
     /// Constructor for IsolationFramework
     /// </summary>
     /// <param name="messageSink"></param>
