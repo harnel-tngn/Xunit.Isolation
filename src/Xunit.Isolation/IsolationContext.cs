@@ -15,6 +15,9 @@ public class IsolationContext : IDisposable
 
     private static ConcurrentDictionary<string, ConcurrentBag<IsolationContext>> _pool = new();
 
+    internal static IsolationContext GetOrCreate(IsolationContextConfigAttribute config)
+        => GetOrCreate(config.IsolationId);
+
     internal static IsolationContext GetOrCreate(string? isolationContextId)
     {
         if (isolationContextId != null)

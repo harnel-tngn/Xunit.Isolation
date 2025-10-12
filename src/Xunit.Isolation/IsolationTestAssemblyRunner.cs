@@ -45,7 +45,7 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         if (testIsolationContextDict.Length == 1)
         {
             var config = testIsolationContextDict.First().Key;
-            using var context = IsolationContext.GetOrCreate(config.IsolationId);
+            using var context = IsolationContext.GetOrCreate(config);
 
             var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
             var clonedTestCases = testCases
