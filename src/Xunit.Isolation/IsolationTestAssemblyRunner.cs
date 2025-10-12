@@ -26,12 +26,6 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
     {
     }
 
-    private static IsolationContext GetOrCreateIsolationContext(Type? typeInfo)
-    {
-        var contextConfig = IsolationContextConfigAttribute.GetConfig(typeInfo);
-        return IsolationContext.GetOrCreate(contextConfig.IsolationId);
-    }
-
     /// <summary>
     /// Run test collection in isolated environment
     /// </summary>
@@ -44,13 +38,14 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         var testIsolationContextDict = testCases
             .GroupBy(testCase => IsolationContextConfigAttribute.GetConfig(testCase.TestMethod.TestClass.Class.ToRuntimeType()))
             .Select(g => KeyValuePair.Create(
-                GetOrCreateIsolationContext(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
+                IsolationContextConfigAttribute.GetConfig(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
                 g.ToArray()))
             .ToArray();
 
         if (testIsolationContextDict.Length == 1)
         {
-            using var context = testIsolationContextDict.First().Key;
+            var config = testIsolationContextDict.First().Key;
+            using var context = IsolationContext.GetOrCreate(config.IsolationId);
 
             var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
             var clonedTestCases = testCases
