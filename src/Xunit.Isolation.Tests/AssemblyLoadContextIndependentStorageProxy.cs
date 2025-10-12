@@ -36,6 +36,14 @@ internal static class AssemblyLoadContextIndependentStorageProxy
             loadIfNotLoaded: true);
     }
 
+    /// <summary>
+    /// Ensure storage dictionary has initialized entry with given identifier and value.
+    /// If already initialized, do nothing.
+    /// </summary>
+    /// <typeparam name="TValue"></typeparam>
+    /// <param name="identifier"></param>
+    /// <param name="value"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     public static void EnsureInitialized<TValue>(string identifier, TValue value)
     {
         if (typeof(TValue).Assembly.GetName().Name != "System.Private.CoreLib")
@@ -51,6 +59,9 @@ internal static class AssemblyLoadContextIndependentStorageProxy
         }
     }
 
+    /// <summary>
+    /// Get from storage dictionary with given identifier.
+    /// </summary>
     public static TValue Get<TValue>(string identifier)
     {
         if (typeof(TValue).Assembly.GetName().Name != "System.Private.CoreLib")
@@ -67,6 +78,9 @@ internal static class AssemblyLoadContextIndependentStorageProxy
         }
     }
 
+    /// <summary>
+    /// Set to storage dictionary with given identifier and value.
+    /// </summary>
     public static void Set<TValue>(string identifier, TValue value)
     {
         if (typeof(TValue).Assembly.GetName().Name != "System.Private.CoreLib")
