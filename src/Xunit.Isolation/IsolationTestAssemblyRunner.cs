@@ -51,7 +51,7 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
                 .Select(testCase => ApplyContextAttribute.ApplyContext(testCase, context))
                 .ToArray();
 
-            return await base.RunTestCollectionAsync(messageBus, testCollection, clonedTestCases, cancellationTokenSource);
+            return await base.RunTestCollectionAsync(messageBus, clonedTestCollection, clonedTestCases, cancellationTokenSource);
         }
         else
         {
