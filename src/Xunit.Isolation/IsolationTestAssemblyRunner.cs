@@ -43,11 +43,11 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
 
         if (testIsolationConfigGroup.Length == 1)
         {
-            var config = testIsolationConfigGroup.First().Key;
+            var (config, subTestCases) = testIsolationConfigGroup.First();
             using var context = IsolationContext.GetOrCreate(config);
 
             var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
-            var clonedTestCases = testCases
+            var clonedTestCases = subTestCases
                 .Select(testCase => ApplyContextAttribute.ApplyContext(testCase, context))
                 .ToArray();
 
