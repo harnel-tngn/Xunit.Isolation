@@ -19,7 +19,11 @@ public class FixtureTest
             _fixture = fixture;
         }
 
+#if USE_SKIPPABLE
+        [SkippableFact]
+#else
         [Fact]
+#endif
         public void Test()
         {
             var fixtureLoadContext = AssemblyLoadContext.GetLoadContext(_fixture.GetType().Assembly);
@@ -41,7 +45,11 @@ public class FixtureTest
             [new ParameterClass(4)],
         ];
 
+#if USE_SKIPPABLE
+        [SkippableTheory]
+#else
         [Theory]
+#endif
         [MemberData(nameof(ParameterClassTheoryTestMemberData))]
         public void ParameterClassTheoryTest(ParameterClass param)
         {
@@ -64,7 +72,11 @@ public class FixtureTest
             [new ParameterStruct(4)],
         ];
 
+#if USE_SKIPPABLE
+        [SkippableTheory]
+#else
         [Theory]
+#endif
         [MemberData(nameof(ParameterStructTheoryTestMemberData))]
         public void ParameterStructTheoryTest(ParameterStruct param)
         {

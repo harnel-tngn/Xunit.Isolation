@@ -12,7 +12,11 @@ public class AssemblyLoadContextReuseTest
         protected abstract AssemblyLoadContextIndependentStorage<bool> _isInitialized { get; }
         protected abstract AssemblyLoadContextIndependentStorage<int> _initCount { get; }
 
+#if USE_SKIPPABLE
+        [SkippableFact]
+#else
         [Fact]
+#endif
         public void FactTest()
         {
             var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);

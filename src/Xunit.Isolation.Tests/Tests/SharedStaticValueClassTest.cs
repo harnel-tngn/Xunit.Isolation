@@ -9,7 +9,11 @@ public class SharedStaticValueClassTest
 
     public abstract class InnerClass
     {
+#if USE_SKIPPABLE
+        [SkippableFact]
+#else
         [Fact]
+#endif
         public void FactTest()
         {
             var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
@@ -28,7 +32,11 @@ public class SharedStaticValueClassTest
             [new ParameterClass(4)],
         ];
 
+#if USE_SKIPPABLE
+        [SkippableTheory]
+#else
         [Theory]
+#endif
         [MemberData(nameof(ParameterClassTheoryTestMemberData))]
         public void ParameterClassTheoryTest(ParameterClass param)
         {
@@ -51,7 +59,11 @@ public class SharedStaticValueClassTest
             [new ParameterStruct(4)],
         ];
 
+#if USE_SKIPPABLE
+        [SkippableTheory]
+#else
         [Theory]
+#endif
         [MemberData(nameof(ParameterStructTheoryTestMemberData))]
         public void ParameterStructTheoryTest(ParameterStruct param)
         {
