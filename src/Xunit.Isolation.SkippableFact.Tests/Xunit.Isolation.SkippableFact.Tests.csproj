@@ -5,16 +5,13 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Xunit.Isolation.Tests\*.cs" />
-  </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);USE_SKIPPABLE</DefineConstants>
+    <RootNamespace>Xunit.Isolation.Tests</RootNamespace>
+  </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="..\Xunit.Isolation.Tests\AssemblyInfo.cs" />
-    <Compile Remove="..\Xunit.Isolation.Tests\FixtureTest.cs" />
-    <Compile Remove="..\Xunit.Isolation.Tests\ParameterClass.cs" />
-    <Compile Remove="..\Xunit.Isolation.Tests\ParameterStruct.cs" />
-    <Compile Remove="..\Xunit.Isolation.Tests\SharedStaticValueClassTest.cs" />
+    <Compile Include="..\Xunit.Isolation.Tests\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,10 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Xunit.Isolation.SkippableFact\Xunit.Isolation.SkippableFact.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
   </ItemGroup>
 
   <ItemGroup>

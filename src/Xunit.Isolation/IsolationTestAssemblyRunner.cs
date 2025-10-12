@@ -25,12 +25,6 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
     {
     }
 
-    private IsolationContext GetOrCreateIsolationContext(bool unloadAtEnd)
-    {
-        // TODO: use pooling
-        return new IsolationContext(unloadAtEnd);
-    }
-
     /// <summary>
     /// Run test collection in isolated environment
     /// </summary>
@@ -40,13 +34,32 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         IEnumerable<IXunitTestCase> testCases,
         CancellationTokenSource cancellationTokenSource)
     {
-        using var context = GetOrCreateIsolationContext(false);
-
-        var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
-        var clonedTestCases = testCases
-            .Select(testCase => ApplyContextAttribute.ApplyContext(testCase, context))
+        var testIsolationConfigGroup = testCases
+            .GroupBy(testCase => IsolationContextConfigAttribute.GetConfig(testCase.TestMethod.TestClass.Class.ToRuntimeType()))
+            .Select(g => KeyValuePair.Create(
+                IsolationContextConfigAttribute.GetConfig(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
+                g.ToArray()))
             .ToArray();
 
-        return await base.RunTestCollectionAsync(messageBus, clonedTestCollection, clonedTestCases, cancellationTokenSource);
+        if (testIsolationConfigGroup.Length == 1)
+        {
+            var config = testIsolationConfigGroup.First().Key;
+            using var context = IsolationContext.GetOrCreate(config);
+
+            var clonedTestCollection = ApplyContextAttribute.ApplyContext(testCollection, context);
+            var clonedTestCases = testCases
+                .Select(testCase => ApplyContextAttribute.ApplyContext(testCase, context))
+                .ToArray();
+
+            return await base.RunTestCollectionAsync(messageBus, testCollection, clonedTestCases, cancellationTokenSource);
+        }
+        else
+        {
+            var summary = new RunSummary();
+            foreach (var (_, subTestCases) in testIsolationConfigGroup)
+                summary.Aggregate(await RunTestCollectionAsync(messageBus, testCollection, subTestCases, cancellationTokenSource));
+
+            return summary;
+        }
     }
 }

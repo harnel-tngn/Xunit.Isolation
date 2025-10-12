@@ -1,23 +1,40 @@
 using System.Collections.Generic;
 using System.Runtime.Loader;
 
-namespace Xunit.Isolation.Tests;
+namespace Xunit.Isolation.Tests.Tests;
 
-public class SharedStaticValueClassTest
+public class FixtureTest
 {
-    public static int StaticValue;
-
-    public abstract class InnerClass
+    public class TestFixture
     {
-        [SkippableFact]
-        public void FactTest()
+        public int FixtureValue;
+    }
+
+    public abstract class InnerClass : IClassFixture<TestFixture>
+    {
+        private readonly TestFixture _fixture;
+
+        public InnerClass(TestFixture fixture)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            _fixture = fixture;
+        }
 
+#if USE_SKIPPABLE
+        [SkippableFact]
+#else
+        [Fact]
+#endif
+        public void Test()
+        {
+            var fixtureLoadContext = AssemblyLoadContext.GetLoadContext(_fixture.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
+
+            Assert.NotEqual(AssemblyLoadContext.Default, fixtureLoadContext);
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
+            Assert.Equal(fixtureLoadContext, thisLoadContext);
 
-            SharedStaticValueClassTest.StaticValue++;
-            Assert.Equal(1, SharedStaticValueClassTest.StaticValue);
+            _fixture.FixtureValue++;
+            Assert.Equal(1, _fixture.FixtureValue);
         }
 
         public static IEnumerable<object[]> ParameterClassTheoryTestMemberData =>
@@ -28,11 +45,15 @@ public class SharedStaticValueClassTest
             [new ParameterClass(4)],
         ];
 
+#if USE_SKIPPABLE
         [SkippableTheory]
+#else
+        [Theory]
+#endif
         [MemberData(nameof(ParameterClassTheoryTestMemberData))]
         public void ParameterClassTheoryTest(ParameterClass param)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
             var paramLoadContext = AssemblyLoadContext.GetLoadContext(param.GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
@@ -51,11 +72,15 @@ public class SharedStaticValueClassTest
             [new ParameterStruct(4)],
         ];
 
+#if USE_SKIPPABLE
         [SkippableTheory]
+#else
+        [Theory]
+#endif
         [MemberData(nameof(ParameterStructTheoryTestMemberData))]
         public void ParameterStructTheoryTest(ParameterStruct param)
         {
-            var thisLoadContext = AssemblyLoadContext.GetLoadContext(this.GetType().Assembly);
+            var thisLoadContext = AssemblyLoadContext.GetLoadContext(GetType().Assembly);
             var paramLoadContext = AssemblyLoadContext.GetLoadContext(param.GetType().Assembly);
 
             Assert.NotEqual(AssemblyLoadContext.Default, thisLoadContext);
@@ -67,8 +92,8 @@ public class SharedStaticValueClassTest
         }
     }
 
-    public class InnerClass1 : InnerClass;
-    public class InnerClass2 : InnerClass;
-    public class InnerClass3 : InnerClass;
-    public class InnerClass4 : InnerClass;
+    public class InnerClass1(TestFixture fixture) : InnerClass(fixture);
+    public class InnerClass2(TestFixture fixture) : InnerClass(fixture);
+    public class InnerClass3(TestFixture fixture) : InnerClass(fixture);
+    public class InnerClass4(TestFixture fixture) : InnerClass(fixture);
 }

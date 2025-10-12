@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Runtime.Loader;
 using System.Threading;
 
@@ -9,12 +11,30 @@ namespace Xunit.Isolation;
 /// </summary>
 public class IsolationContext : IDisposable
 {
-    private static int _lastContextId;
+    private static int _anonymousContextIdCounter = 0;
+
+    private static ConcurrentDictionary<string, ConcurrentBag<IsolationContext>> _pool = new();
+
+    internal static IsolationContext GetOrCreate(IsolationContextConfigAttribute config)
+        => GetOrCreate(config.IsolationId);
+
+    internal static IsolationContext GetOrCreate(string? isolationContextId)
+    {
+        if (isolationContextId != null)
+        {
+            var bag = _pool.GetOrAdd(isolationContextId, static _ => new ConcurrentBag<IsolationContext>());
+            if (bag != null && bag.TryTake(out var context))
+                return context;
+        }
+
+        var newContext = new IsolationContext(isolationContextId == null, isolationContextId);
+        return newContext;
+    }
 
     /// <summary>
-    /// Id of context
+    /// ID of isolation context
     /// </summary>
-    public int ContextId { get; }
+    public string? IsolationContextId { get; }
 
     /// <summary>
     /// Unload AssemblyLoadContext if true at the end of use
@@ -29,11 +49,16 @@ public class IsolationContext : IDisposable
     /// <summary>
     /// Constructor for isolation context
     /// </summary>
-    public IsolationContext(bool unloadAtEnd)
+    private IsolationContext(bool unloadAtEnd, string? isolationContextId)
     {
-        ContextId = Interlocked.Increment(ref _lastContextId);
         UnloadAtEnd = unloadAtEnd;
-        AssemblyLoadContext = new AssemblyLoadContext($"Isolation.{ContextId}", true);
+        IsolationContextId = isolationContextId;
+
+        var assemblyLoadContext = isolationContextId != null
+            ? $"Isolation.Named.{isolationContextId}"
+            : $"Isolation.Anonymous.{Interlocked.Increment(ref _anonymousContextIdCounter)}";
+
+        AssemblyLoadContext = new AssemblyLoadContext(assemblyLoadContext, true);
     }
 
     /// <summary>
@@ -41,7 +66,24 @@ public class IsolationContext : IDisposable
     /// </summary>
     ~IsolationContext()
     {
-        Dispose();
+        Dispose(returnToPool: true);
+    }
+
+    /// <summary>
+    /// Unload the AssemblyLoadContext
+    /// </summary>
+    private void Dispose(bool returnToPool)
+    {
+        if (returnToPool && IsolationContextId != null)
+        {
+            var bag = _pool.GetValueOrDefault(IsolationContextId);
+            bag?.Add(this);
+        }
+        else
+        {
+            AssemblyLoadContext.Unload();
+            GC.SuppressFinalize(this);
+        }
     }
 
     /// <summary>
@@ -49,7 +91,6 @@ public class IsolationContext : IDisposable
     /// </summary>
     public void Dispose()
     {
-        AssemblyLoadContext.Unload();
-        GC.SuppressFinalize(this);
+        Dispose(!UnloadAtEnd);
     }
 }

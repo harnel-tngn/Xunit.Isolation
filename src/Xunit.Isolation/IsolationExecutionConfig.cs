@@ -3,16 +3,19 @@ using System.IO;
 
 namespace Xunit.Isolation;
 
-internal class IsolationConfig
+/// <summary>
+/// Class for configure execution of Xunit.Isolation.
+/// </summary>
+internal class IsolationExecutionConfig
 {
-    private static IsolationConfig? _instance;
-    public static IsolationConfig Instance
+    private static IsolationExecutionConfig? _instance;
+    public static IsolationExecutionConfig Instance
     {
         get
         {
             if (_instance == null)
             {
-                var instance = new IsolationConfig();
+                var instance = new IsolationExecutionConfig();
                 var config = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("isolation.json", optional: true)
