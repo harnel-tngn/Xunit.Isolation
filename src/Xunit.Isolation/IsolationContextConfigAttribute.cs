@@ -16,9 +16,14 @@ public class IsolationContextConfigAttribute : Attribute, IEquatable<IsolationCo
     public string? IsolationId { get; }
 
     /// <summary>
-    /// Constructor of <see cref="IsolationContextConfigAttribute"/>
+    /// Constructor of <see cref="IsolationContextConfigAttribute"/>. <br/>
+    /// 
+    /// Note that multiple <see cref="IsolationContext"/> with same ID may exist at the same time.
+    /// Use <see cref="CollectionAttribute"/> to control number of <see cref="IsolationContext"/> with same ID.
     /// </summary>
-    /// <param name="isolationId">Required ID of isolation context. If null, temporary isolation context will be created.</param>
+    /// <param name="isolationId">
+    /// Required ID of isolation context. If null, temporary isolation context will be created.
+    /// </param>
     public IsolationContextConfigAttribute(string? isolationId = null)
     {
         IsolationId = isolationId;
