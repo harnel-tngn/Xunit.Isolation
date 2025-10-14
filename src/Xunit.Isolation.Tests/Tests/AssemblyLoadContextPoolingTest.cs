@@ -1,12 +1,13 @@
+using System.Collections.Concurrent;
 using System.Runtime.Loader;
 
 namespace Xunit.Isolation.Tests.Tests;
 
-public class AssemblyLoadContextReuseTest
+public class AssemblyLoadContextPoolingTest
 {
     private static int StaticValue;
 
-    [Collection("AssemblyLoadContextReuseTest")]
+    [Collection("AssemblyLoadContextPoolingTest")]
     public abstract class InnerClass
     {
         protected abstract AssemblyLoadContextIndependentStorage<bool> _isInitialized { get; }
@@ -34,18 +35,18 @@ public class AssemblyLoadContextReuseTest
         }
     }
 
-    [IsolationContextId("AssemblyLoadContextReuseTest.A")]
+    [IsolationContextId("AssemblyLoadContextPoolingTest.A")]
     public abstract class InnerClassA : InnerClass
     {
-        protected override AssemblyLoadContextIndependentStorage<bool> _isInitialized => new("AssemblyLoadContextReuseTest.A.IsInitialized");
-        protected override AssemblyLoadContextIndependentStorage<int> _initCount => new("AssemblyLoadContextReuseTest.A.InitCount");
+        protected override AssemblyLoadContextIndependentStorage<bool> _isInitialized => new("AssemblyLoadContextPoolingTest.A.IsInitialized");
+        protected override AssemblyLoadContextIndependentStorage<int> _initCount => new("AssemblyLoadContextPoolingTest.A.InitCount");
     }
 
-    [IsolationContextId("AssemblyLoadContextReuseTest.B")]
+    [IsolationContextId("AssemblyLoadContextPoolingTest.B")]
     public abstract class InnerClassB : InnerClass
     {
-        protected override AssemblyLoadContextIndependentStorage<bool> _isInitialized => new("AssemblyLoadContextReuseTest.B.IsInitialized");
-        protected override AssemblyLoadContextIndependentStorage<int> _initCount => new("AssemblyLoadContextReuseTest.B.InitCount");
+        protected override AssemblyLoadContextIndependentStorage<bool> _isInitialized => new("AssemblyLoadContextPoolingTest.B.IsInitialized");
+        protected override AssemblyLoadContextIndependentStorage<int> _initCount => new("AssemblyLoadContextPoolingTest.B.InitCount");
     }
 
     public class InnerClassA1 : InnerClassA;

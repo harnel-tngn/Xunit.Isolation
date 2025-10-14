@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Runtime.Loader;
 using System.Threading;
 
@@ -12,29 +11,33 @@ namespace Xunit.Isolation;
 public class IsolationContext : IDisposable
 {
     private static int _anonymousContextIdCounter = 0;
+    private static ConcurrentDictionary<string, int> _pooledContextIdCounter = new();
 
-    private static ConcurrentDictionary<string, ConcurrentBag<IsolationContext>> _pool = new();
+    private static readonly ConcurrentDictionary<string, IsolationContext> _isolationContextCache = new();
 
-    internal static IsolationContext GetOrCreate(IsolationContextConfigAttribute config)
-        => GetOrCreate(config.IsolationId);
-
-    internal static IsolationContext GetOrCreate(string? isolationContextId)
+    internal static IsolationContext GetOrCreate(IsolationContextConfigBaseAttribute? isolationConfig)
     {
-        if (isolationContextId != null)
-        {
-            var bag = _pool.GetOrAdd(isolationContextId, static _ => new ConcurrentBag<IsolationContext>());
-            if (bag != null && bag.TryTake(out var context))
-                return context;
-        }
+        if (isolationConfig == null)
+            return new IsolationContext(unloadAtEnd: true);
 
-        var newContext = new IsolationContext(isolationContextId == null, isolationContextId);
-        return newContext;
+        if (isolationConfig is IsolationContextIdAttribute isolationContextIdAttr)
+            return new IsolationContext(unloadAtEnd: false, isolationContextId: isolationContextIdAttr.IsolationId);
+
+        if (isolationConfig is IsolationContextPoolIdAttribute isolationContextPoolIdAttr)
+            return new IsolationContext(unloadAtEnd: false, isolationContextPoolId: isolationContextPoolIdAttr.IsolationPoolId);
+
+        throw new NotImplementedException($"Unknown context attribute type {isolationConfig.GetType()}");
     }
 
     /// <summary>
     /// ID of isolation context
     /// </summary>
     public string? IsolationContextId { get; }
+
+    /// <summary>
+    /// ID of isolation context pool
+    /// </summary>
+    public string? IsolationContextPoolId { get; }
 
     /// <summary>
     /// Unload AssemblyLoadContext if true at the end of use
@@ -49,16 +52,27 @@ public class IsolationContext : IDisposable
     /// <summary>
     /// Constructor for isolation context
     /// </summary>
-    private IsolationContext(bool unloadAtEnd, string? isolationContextId)
+    private IsolationContext(bool unloadAtEnd = false, string? isolationContextId = null, string? isolationContextPoolId = null)
     {
         UnloadAtEnd = unloadAtEnd;
         IsolationContextId = isolationContextId;
+        IsolationContextPoolId = isolationContextPoolId;
 
-        var assemblyLoadContext = isolationContextId != null
-            ? $"Isolation.Named.{isolationContextId}"
-            : $"Isolation.Anonymous.{Interlocked.Increment(ref _anonymousContextIdCounter)}";
+        AssemblyLoadContext = new AssemblyLoadContext(GetAssemblyLoadContextName(), true);
+    }
 
-        AssemblyLoadContext = new AssemblyLoadContext(assemblyLoadContext, true);
+    private string GetAssemblyLoadContextName()
+    {
+        if (IsolationContextId != null)
+            return $"Isolation.Named.{IsolationContextId}";
+
+        if (IsolationContextPoolId != null)
+        {
+            var counter = _pooledContextIdCounter.AddOrUpdate(IsolationContextPoolId, 1, (_, v) => v + 1);
+            return $"Isolation.Pooled.{counter}";
+        }
+
+        return $"Isolation.Anonymous.{Interlocked.Increment(ref _anonymousContextIdCounter)}";
     }
 
     /// <summary>
@@ -66,20 +80,15 @@ public class IsolationContext : IDisposable
     /// </summary>
     ~IsolationContext()
     {
-        Dispose(returnToPool: true);
+        Dispose(unload: true);
     }
 
     /// <summary>
     /// Unload the AssemblyLoadContext
     /// </summary>
-    private void Dispose(bool returnToPool)
+    private void Dispose(bool unload)
     {
-        if (returnToPool && IsolationContextId != null)
-        {
-            var bag = _pool.GetValueOrDefault(IsolationContextId);
-            bag?.Add(this);
-        }
-        else
+        if (!unload || IsolationContextId != null)
         {
             AssemblyLoadContext.Unload();
             GC.SuppressFinalize(this);
@@ -91,6 +100,9 @@ public class IsolationContext : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Dispose(!UnloadAtEnd);
+        Dispose(UnloadAtEnd);
     }
+
+    /// <inheritdoc/>
+    public override string ToString() => AssemblyLoadContext.Name ?? String.Empty;
 }
