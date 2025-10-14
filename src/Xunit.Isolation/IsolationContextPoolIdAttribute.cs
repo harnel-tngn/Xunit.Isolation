@@ -12,7 +12,7 @@ public class IsolationContextPoolIdAttribute : IsolationContextConfigBaseAttribu
     /// <summary>
     /// Required ID of isolation context.
     /// </summary>
-    public string? IsolationPoolId { get; }
+    public string IsolationPoolId { get; }
 
     /// <summary>
     /// Constructor of <see cref="IsolationContextPoolIdAttribute"/>.

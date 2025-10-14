@@ -17,7 +17,7 @@ public abstract class IsolationContextConfigBaseAttribute : Attribute
     {
         while (type != null)
         {
-            if (type.GetCustomAttribute<IsolationContextConfigBaseAttribute>() is IsolationContextConfigBaseAttribute attr)
+            if (type.GetCustomAttribute<IsolationContextConfigBaseAttribute>() is { } attr)
                 return attr;
 
             type = type.BaseType;

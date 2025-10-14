@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Runtime.Loader;
 
 namespace Xunit.Isolation.Tests.Tests;
