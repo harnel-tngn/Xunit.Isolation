@@ -24,19 +24,6 @@ public class IsolationContextPoolIdAttribute : IsolationContextConfigBaseAttribu
     }
 
     /// <inheritdoc/>
-    public static bool operator ==(IsolationContextPoolIdAttribute? l, IsolationContextPoolIdAttribute? r)
-    {
-        if (Object.ReferenceEquals(l, null))
-            return Object.ReferenceEquals(r, null);
-
-        return l.Equals(r);
-    }
-
-    /// <inheritdoc/>
-    public static bool operator !=(IsolationContextPoolIdAttribute? l, IsolationContextPoolIdAttribute? r)
-        => !(l == r);
-
-    /// <inheritdoc/>
     public bool Equals(IsolationContextPoolIdAttribute? other) =>
         other != null
         && Equals(IsolationPoolId, other.IsolationPoolId);

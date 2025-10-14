@@ -25,19 +25,6 @@ public class IsolationContextIdAttribute : IsolationContextConfigBaseAttribute, 
     }
 
     /// <inheritdoc/>
-    public static bool operator ==(IsolationContextIdAttribute? l, IsolationContextIdAttribute? r)
-    {
-        if (Object.ReferenceEquals(l, null))
-            return Object.ReferenceEquals(r, null);
-
-        return l.Equals(r);
-    }
-
-    /// <inheritdoc/>
-    public static bool operator !=(IsolationContextIdAttribute? l, IsolationContextIdAttribute? r)
-        => !(l == r);
-
-    /// <inheritdoc/>
     public bool Equals(IsolationContextIdAttribute? other) =>
         other != null
         && Equals(IsolationId, other.IsolationId);
