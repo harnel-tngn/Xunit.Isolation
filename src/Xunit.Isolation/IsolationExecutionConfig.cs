@@ -9,6 +9,7 @@ namespace Xunit.Isolation;
 internal class IsolationExecutionConfig
 {
     private static IsolationExecutionConfig? _instance;
+
     public static IsolationExecutionConfig Instance
     {
         get
@@ -28,6 +29,12 @@ internal class IsolationExecutionConfig
             return _instance;
         }
     }
+
+    public static string[] KnownIsolationAssemblies =>
+    [
+        "Xunit.Isolation",
+        "Xunit.Isolation.SkippableFact",
+    ];
 
     public string[] IsolationAssemblies { get; set; } = [];
 }

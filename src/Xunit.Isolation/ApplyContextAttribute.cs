@@ -39,7 +39,13 @@ public class ApplyContextAttribute : Attribute
     static ApplyContextAttribute()
     {
         var assemblyLoadContext = AssemblyLoadContext.Default;
-        foreach (var assemblyName in IsolationExecutionConfig.Instance.IsolationAssemblies)
+        var assemblyNames = new HashSet<string>(
+        [
+            .. IsolationExecutionConfig.KnownIsolationAssemblies,
+            .. IsolationExecutionConfig.Instance.IsolationAssemblies,
+        ]);
+
+        foreach (var assemblyName in assemblyNames)
         {
             var assembly = assemblyLoadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
             LoadFromAssembly(assembly);
