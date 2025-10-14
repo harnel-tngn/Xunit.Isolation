@@ -4,7 +4,7 @@
 [![NuGet package](https://img.shields.io/nuget/v/Xunit.Isolation.svg)](https://nuget.org/packages/Xunit.Isolation)
 [![NuGet package](https://img.shields.io/nuget/v/Xunit.Isolation.SkippableFact.svg)](https://nuget.org/packages/Xunit.Isolation.SkippableFact)
 
-Xunit.Isolation is library to run Xunit tests in isolated `AssemblyLoadContext`, means every static variables referenced in tests are isolated and does not affect each other.
+Xunit.Isolation is a library to run Xunit tests in isolated `AssemblyLoadContext`, means every static variables referenced in tests are isolated and does not affect each other.
 
 ## Getting Started
 
