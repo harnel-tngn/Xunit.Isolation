@@ -35,9 +35,9 @@ public class IsolationTestAssemblyRunner : XunitTestAssemblyRunner
         CancellationTokenSource cancellationTokenSource)
     {
         var testIsolationConfigGroup = testCases
-            .GroupBy(testCase => IsolationContextConfigAttribute.GetConfig(testCase.TestMethod.TestClass.Class.ToRuntimeType()))
+            .GroupBy(testCase => IsolationContextIdAttribute.GetConfig(testCase.TestMethod.TestClass.Class.ToRuntimeType()))
             .Select(g => KeyValuePair.Create(
-                IsolationContextConfigAttribute.GetConfig(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
+                IsolationContextConfigBaseAttribute.GetConfig(g.First().TestMethod.TestClass.Class.ToRuntimeType()),
                 g.ToArray()))
             .ToArray();
 

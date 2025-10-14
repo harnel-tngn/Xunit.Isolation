@@ -1,8 +1,8 @@
-using AssemblyLoadContextHelper;
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Loader;
+using AssemblyLoadContextHelper;
 
 namespace Xunit.Isolation.Tests;
 
