@@ -25,4 +25,27 @@ public abstract class IsolationContextConfigBaseAttribute : Attribute
 
         return null;
     }
+
+    /// <summary>
+    /// Compare two given IsolationContextConfigBaseAttribute, returns true if equal, and vice versa.
+    /// </summary>
+    public static bool operator ==(IsolationContextConfigBaseAttribute? l, IsolationContextConfigBaseAttribute? r)
+    {
+        if (Object.ReferenceEquals(l, null))
+            return Object.ReferenceEquals(r, null);
+
+        return l.Equals(r);
+    }
+
+    /// <summary>
+    /// Compare two given IsolationContextConfigBaseAttribute, returns true if not equal, and vice versa.
+    /// </summary>
+    public static bool operator !=(IsolationContextConfigBaseAttribute? l, IsolationContextConfigBaseAttribute? r)
+        => !(l == r);
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => throw new NotImplementedException("Child class must implement Equals");
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => throw new NotImplementedException("Child class must implement GetHashCode");
 }

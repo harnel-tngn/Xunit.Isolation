@@ -32,10 +32,4 @@
     <ProjectReference Include="..\Xunit.Isolation.SkippableFact\Xunit.Isolation.SkippableFact.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="isolation.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
