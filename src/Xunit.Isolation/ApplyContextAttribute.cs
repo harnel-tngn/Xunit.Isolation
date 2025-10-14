@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
@@ -41,14 +42,21 @@ public class ApplyContextAttribute : Attribute
         var assemblyLoadContext = AssemblyLoadContext.Default;
         var assemblyNames = new HashSet<string>(
         [
-            .. IsolationExecutionConfig.KnownIsolationAssemblies,
-            .. IsolationExecutionConfig.Instance.IsolationAssemblies,
-        ]);
+            ..IsolationExecutionConfig.KnownIsolationAssemblies,
+            ..IsolationExecutionConfig.Instance.IsolationAssemblies,
+        ], StringComparer.OrdinalIgnoreCase);
 
         foreach (var assemblyName in assemblyNames)
         {
-            var assembly = assemblyLoadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
-            LoadFromAssembly(assembly);
+            try
+            {
+                var assembly = assemblyLoadContext.LoadFromAssemblyName(new AssemblyName(assemblyName));
+                LoadFromAssembly(assembly);
+            }
+            catch (FileNotFoundException ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
     }
 
