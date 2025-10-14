@@ -42,4 +42,10 @@ public abstract class IsolationContextConfigBaseAttribute : Attribute
     /// </summary>
     public static bool operator !=(IsolationContextConfigBaseAttribute? l, IsolationContextConfigBaseAttribute? r)
         => !(l == r);
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj) => throw new NotImplementedException("Child class must implement Equals");
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => throw new NotImplementedException("Child class must implement GetHashCode");
 }
