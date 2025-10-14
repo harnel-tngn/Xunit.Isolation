@@ -11,9 +11,10 @@ namespace Xunit.Isolation;
 public class IsolationContext : IDisposable
 {
     private static int _anonymousContextIdCounter = 0;
-    private static ConcurrentDictionary<string, int> _pooledContextIdCounter = new();
+    private static readonly ConcurrentDictionary<string, int> _pooledContextIdCounter = new();
 
     private static readonly ConcurrentDictionary<string, IsolationContext> _isolationContextCache = new();
+    private static readonly ConcurrentDictionary<string, ConcurrentBag<IsolationContext>> _isolationContextPoolCache = new();
 
     internal static IsolationContext GetOrCreate(IsolationContextConfigBaseAttribute? isolationConfig)
     {
@@ -21,10 +22,23 @@ public class IsolationContext : IDisposable
             return new IsolationContext(unloadAtEnd: true);
 
         if (isolationConfig is IsolationContextIdAttribute isolationContextIdAttr)
-            return new IsolationContext(unloadAtEnd: false, isolationContextId: isolationContextIdAttr.IsolationId);
+        {
+            return _isolationContextCache.GetOrAdd(
+                isolationContextIdAttr.IsolationId,
+                static isolationContextId => new IsolationContext(isolationContextId: isolationContextId));
+        }
 
         if (isolationConfig is IsolationContextPoolIdAttribute isolationContextPoolIdAttr)
-            return new IsolationContext(unloadAtEnd: false, isolationContextPoolId: isolationContextPoolIdAttr.IsolationPoolId);
+        {
+            var bag = _isolationContextPoolCache.GetOrAdd(
+                isolationContextPoolIdAttr.IsolationPoolId,
+                static _ => new ConcurrentBag<IsolationContext>());
+
+            if (bag.TryTake(out var context))
+                return context;
+
+            return new IsolationContext(isolationContextPoolId: isolationContextPoolIdAttr.IsolationPoolId);
+        }
 
         throw new NotImplementedException($"Unknown context attribute type {isolationConfig.GetType()}");
     }
@@ -69,7 +83,7 @@ public class IsolationContext : IDisposable
         if (IsolationContextPoolId != null)
         {
             var counter = _pooledContextIdCounter.AddOrUpdate(IsolationContextPoolId, 1, (_, v) => v + 1);
-            return $"Isolation.Pooled.{counter}";
+            return $"Isolation.Pooled.{IsolationContextPoolId}#{counter}";
         }
 
         return $"Isolation.Anonymous.{Interlocked.Increment(ref _anonymousContextIdCounter)}";
@@ -80,18 +94,30 @@ public class IsolationContext : IDisposable
     /// </summary>
     ~IsolationContext()
     {
-        Dispose(unload: true);
+        Dispose(forceUnload: true);
     }
 
     /// <summary>
     /// Unload the AssemblyLoadContext
     /// </summary>
-    private void Dispose(bool unload)
+    private void Dispose(bool forceUnload)
     {
-        if (!unload || IsolationContextId != null)
+        var needUnload = forceUnload;
+
+        if (needUnload)
         {
             AssemblyLoadContext.Unload();
             GC.SuppressFinalize(this);
+            return;
+        }
+
+        if (IsolationContextPoolId != null)
+        {
+            var bag = _isolationContextPoolCache.GetOrAdd(
+                IsolationContextPoolId,
+                static _ => new ConcurrentBag<IsolationContext>());
+
+            bag.Add(this);
         }
     }
 
@@ -100,7 +126,7 @@ public class IsolationContext : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Dispose(UnloadAtEnd);
+        Dispose(forceUnload: UnloadAtEnd);
     }
 
     /// <inheritdoc/>
